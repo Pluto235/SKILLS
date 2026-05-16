@@ -1,0 +1,18 @@
+{
+  "marketplaces": [
+    {
+      "name": "claude-plugins-official",
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  ],
+  "enabled_plugins": [
+    "frontend-design@claude-plugins-official",
+    "superpowers@claude-plugins-official",
+    "context7@claude-plugins-official",
+    "code-review@claude-plugins-official",
+    "github@claude-plugins-official"
+  ]
+}
