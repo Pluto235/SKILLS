@@ -1,56 +1,91 @@
-# SKILLS — 我的 Claude Code 配置同步仓库
+# SKILLS — Claude Code + Codex 配置同步仓库
 
-私人仓库。同步 [Claude Code](https://claude.com/claude-code) 的个人 skills、插件清单、settings 偏好，在新机器上一键还原。
+私人配置仓库。用于同步 Claude Code 与 Codex 的个人 skills、插件清单和安全偏好模板。目标是在新机器上把这个仓库交给对应 agent 后，一键还原常用工作环境。
 
-## 内容
+## 目录
 
 | 路径 | 作用 |
 |---|---|
-| `install.sh` | 把仓库内容铺到 `~/.claude/`（幂等，可重复跑） |
-| `sync.sh` | 反向：把当前机器的 `~/.claude/` 状态写回仓库 |
-| `manifest.json` | marketplace + 启用插件清单 |
-| `settings.template.json` | 要 merge 进 `~/.claude/settings.json` 的键（`$HOME` 占位会在 install 时被替换） |
-| `statusline-command.sh` | 自定义状态栏脚本 |
-| `skills/` | 个人 skill 目录 |
+| `install-all.sh` | 同时安装 Claude Code 与 Codex 的托管配置 |
+| `sync-all.sh` | 从当前机器安全采集 Claude Code + Codex 配置并展示 diff |
+| `install.sh` | 兼容旧入口，转发到 `install-all.sh` |
+| `claude/` | Claude Code 专属 skills、插件 manifest、settings 模板、安装/同步脚本 |
+| `codex/` | Codex 专属 skills、`.agents/skills`、Codex 配置模板、安装/同步脚本 |
+| `shared/skills/` | 可复制到 Codex 的通用 skills |
+| `scripts/` | 安全模板生成与 Codex TOML 合并辅助脚本 |
 
-## 在新机器上还原（**给 Claude 的指令**）
+## 新机器一键还原
 
-> 告诉新机器上的 Claude Code 一句话即可：
->
-> ```
-> 把 git@github.com:Pluto235/SKILLS.git 克隆到 ~/.claude/SKILLS 并执行里面的 install.sh 还原我的 Claude 配置
-> ```
+给 Claude Code 或 Codex 的指令：
 
-Claude 会执行：
-
-```bash
-git clone git@github.com:Pluto235/SKILLS.git ~/.claude/SKILLS
-bash ~/.claude/SKILLS/install.sh
+```text
+把 git@github.com:Pluto235/SKILLS.git 克隆到 ~/Documents/SKILLS，然后执行 bash ~/Documents/SKILLS/install-all.sh 还原我的 Claude Code 和 Codex 配置。
 ```
 
-依赖：`git`、`jq`（macOS: `brew install jq`；Debian/Ubuntu: `sudo apt install jq`）。
-
-装完 **重启 Claude Code**，让插件被加载。
-
-如果某个插件没出现，进 Claude 后跑一次 `/plugin install <name>@claude-plugins-official` 作为兜底。
-
-## 把本机改动 push 回仓库
-
-在 Claude 里说一句：
-
-> sync my Claude config
-
-Claude 会调用本仓库附带的 `sync-claude-config` skill，跑 `sync.sh`、展示 diff、再由你确认提交。
-
-手动跑：
+手动执行：
 
 ```bash
-bash ~/.claude/SKILLS/sync.sh
-cd ~/.claude/SKILLS && git add -A && git commit -m "sync from $(hostname)" && git push
+git clone git@github.com:Pluto235/SKILLS.git ~/Documents/SKILLS
+bash ~/Documents/SKILLS/install-all.sh
 ```
 
-## 注意
+先看将会改什么：
 
-- `sync.sh` 会用本机的 skills 目录**覆盖**仓库的 skills 目录（删除仓库里、本机已删的 skill）。如果你想保留一个 skill 只在某台机器上，别把它放进 `~/.claude/skills/`。
-- `install.sh` 的 settings merge 是 `existing * template`，模板键覆盖现有值；本机独有键不受影响。
-- 仓库**只**管 skills + 插件清单 + statusline + 上述 settings 键。不要把 `~/.claude/{sessions,history.jsonl,.credentials.json,projects,cache}` 等同步进来。
+```bash
+bash ~/Documents/SKILLS/install-all.sh --dry-run
+```
+
+安装后重启 Claude Code 和 Codex，让新 skills/plugins 被加载。
+
+## 同步当前机器到仓库
+
+```bash
+cd ~/Documents/SKILLS
+git pull --rebase --autostash
+bash sync-all.sh
+git diff --stat
+git diff
+git add -A
+git commit -m "sync agent config from $(hostname) on $(date -u +%Y-%m-%d)"
+git push
+```
+
+`sync-all.sh` 会刷新：
+
+- Claude Code skills、marketplaces、enabled plugins、脱敏 settings 模板。
+- Codex user skills、`~/.agents/skills`、安全 Codex config 模板。
+- 明显 secret 模式检查；发现疑似 token 会失败退出。
+
+## 边界
+
+Claude-only：
+
+- `claude/manifest.json`
+- `claude/settings.template.json`
+- `claude/statusline-command.sh`
+- Claude marketplace/plugin 安装逻辑
+
+Codex-only：
+
+- `codex/skills/`
+- `codex/agents-skills/`
+- `codex/pua-skills/`
+- `codex/config.template.toml`
+
+Shared：
+
+- `shared/skills/devlog`
+- `shared/skills/grill-me`
+- `shared/skills/guizang-ppt-skill`
+
+## 绝不入库
+
+- `~/.claude/settings.json` 里的 `env`
+- `ANTHROPIC_AUTH_TOKEN`
+- `GITHUB_PERSONAL_ACCESS_TOKEN`
+- `~/.codex/auth.json`
+- `~/.codex/models_cache.json`
+- sessions、archived sessions、history、cache、telemetry、shell snapshots
+- 项目级 trust/history/cache 状态
+
+仓库即使保持私有，也按“可能泄露”标准处理密钥。

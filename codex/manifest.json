@@ -1,0 +1,28 @@
+{
+  "skills": {
+    "codex": [
+      "hatch-pet",
+      "ssh-mihomo-check",
+      "sync-agent-config"
+    ],
+    "agents": [
+      "find-skills",
+      "zhangxuefeng-perspective"
+    ],
+    "shared": [
+      "devlog",
+      "grill-me",
+      "guizang-ppt-skill"
+    ],
+    "pua_codex": true
+  },
+  "plugins": {
+    "enabled": [
+      "browser@openai-bundled"
+    ],
+    "notes": {
+      "claude_plugins_are_not_copied": true,
+      "context7_github_web_access": "Adapt later through Codex MCP/plugin support instead of copying Claude plugins verbatim."
+    }
+  }
+}

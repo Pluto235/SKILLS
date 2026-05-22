@@ -1,0 +1,15 @@
+# Safe Codex config template. No auth tokens, sessions, caches, or project trust entries.
+disable_response_storage = true
+model_reasoning_effort = "medium"
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true

@@ -1,0 +1,44 @@
+{
+  "model": "sonnet[1m]",
+  "effortLevel": "high",
+  "skipDangerousModePermissionPrompt": true,
+  "enabledPlugins": {
+    "claude-api@anthropic-agent-skills": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "document-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": true,
+    "feature-dev@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "pua@pua-skills": true,
+    "ralph-loop@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "web-access@web-access": true
+  },
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    },
+    "pua-skills": {
+      "source": {
+        "source": "github",
+        "repo": "tanweai/pua"
+      }
+    },
+    "web-access": {
+      "source": {
+        "source": "github",
+        "repo": "eze-is/web-access"
+      }
+    }
+  }
+}

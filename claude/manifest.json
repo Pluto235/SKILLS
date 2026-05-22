@@ -1,0 +1,51 @@
+{
+  "marketplaces": [
+    {
+      "name": "claude-plugins-official",
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    },
+    {
+      "name": "web-access",
+      "source": {
+        "source": "github",
+        "repo": "eze-is/web-access"
+      }
+    },
+    {
+      "name": "pua-skills",
+      "source": {
+        "source": "github",
+        "repo": "tanweai/pua"
+      }
+    },
+    {
+      "name": "anthropic-agent-skills",
+      "source": {
+        "source": "github",
+        "repo": "anthropics/skills"
+      }
+    }
+  ],
+  "enabled_plugins": [
+    "claude-api@anthropic-agent-skills",
+    "claude-md-management@claude-plugins-official",
+    "code-review@claude-plugins-official",
+    "code-simplifier@claude-plugins-official",
+    "commit-commands@claude-plugins-official",
+    "context7@claude-plugins-official",
+    "document-skills@anthropic-agent-skills",
+    "example-skills@anthropic-agent-skills",
+    "feature-dev@claude-plugins-official",
+    "frontend-design@claude-plugins-official",
+    "github@claude-plugins-official",
+    "playwright@claude-plugins-official",
+    "pua@pua-skills",
+    "ralph-loop@claude-plugins-official",
+    "skill-creator@claude-plugins-official",
+    "superpowers@claude-plugins-official",
+    "web-access@web-access"
+  ]
+}

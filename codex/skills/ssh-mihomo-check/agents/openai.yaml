@@ -1,0 +1,4 @@
+interface:
+  display_name: "SSH Mihomo Check"
+  short_description: "Inspect remote mihomo over SSH and fix bad proxy paths"
+  default_prompt: "Use $ssh-mihomo-check to inspect ETO or PDC, repair an unhealthy mihomo proxy path, and report the final node state."
