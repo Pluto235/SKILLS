@@ -1,0 +1,3 @@
+display_name: Micu API Usage Report
+short_description: Generates snapshot-based Micu API quota reports with freshness checks.
+default_prompt: Generate the Micu API usage report, validate that the fetched console data is fresh, and save the HTML/JSON outputs.

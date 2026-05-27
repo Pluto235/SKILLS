@@ -13,3 +13,6 @@ enabled = true
 
 [plugins."presentations@openai-primary-runtime"]
 enabled = true
+
+[plugins."ecc@ecc"]
+enabled = true
