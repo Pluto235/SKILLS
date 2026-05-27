@@ -13,6 +13,12 @@ def dirs(path: Path) -> list[str]:
     return sorted(p.name for p in path.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
 
 
+def subdirs(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    return sorted(p.name for p in path.iterdir() if p.is_dir())
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print("usage: write_codex_manifest.py CODEX_DIR", file=sys.stderr)
@@ -27,6 +33,7 @@ def main() -> int:
         },
         "plugins": {
             "enabled": ["browser@openai-bundled"],
+            "local_marketplaces": subdirs(root / "local-marketplaces"),
             "notes": {
                 "claude_plugins_are_not_copied": True,
                 "context7_github_web_access": "Adapt later through Codex MCP/plugin support instead of copying Claude plugins verbatim.",

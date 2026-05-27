@@ -45,6 +45,9 @@
     "enabled": [
       "browser@openai-bundled"
     ],
+    "local_marketplaces": [
+      "ecc"
+    ],
     "notes": {
       "claude_plugins_are_not_copied": true,
       "context7_github_web_access": "Adapt later through Codex MCP/plugin support instead of copying Claude plugins verbatim."

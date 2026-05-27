@@ -6,6 +6,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
 AGENTS_DIR="$HOME/.agents"
 OUT_DIR="$REPO_DIR/codex"
+MARKETPLACES_DIR="$CODEX_DIR/local-marketplaces"
 
 log() { printf "\033[1;36m[codex-sync]\033[0m %s\n" "$*"; }
 
@@ -40,6 +41,17 @@ fi
 
 log "refreshing safe config.template.toml"
 python3 "$REPO_DIR/scripts/write_codex_template.py" "$CODEX_DIR/config.toml" "$OUT_DIR/config.template.toml"
+
+log "snapshotting local plugin marketplaces"
+rm -rf "$OUT_DIR/local-marketplaces"
+if [ -d "$MARKETPLACES_DIR" ]; then
+  mkdir -p "$OUT_DIR/local-marketplaces"
+  for d in "$MARKETPLACES_DIR"/*/; do
+    [ -d "$d" ] || continue
+    cp -R "$d" "$OUT_DIR/local-marketplaces/$(basename "$d")"
+    log "  · local marketplace $(basename "$d")"
+  done
+fi
 
 log "refreshing manifest.json"
 python3 "$REPO_DIR/scripts/write_codex_manifest.py" "$OUT_DIR"

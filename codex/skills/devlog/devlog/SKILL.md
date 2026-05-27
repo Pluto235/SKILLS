@@ -1,6 +1,10 @@
 ---
 name: devlog
-description: Maintain a lightweight `devlog.md` modification log at the git project root. Auto-invoke after any meaningful code change in a project that has `devlog.md` at root. Also invoke when the user explicitly asks — slash command `/devlog [summary]`, or natural language: "写一下devlog" / "记一下 devlog" / "更新 devlog" / "devlog 加一条" / "log this change" / "add a devlog entry" / "update the changelog" / mentions "devlog" alongside a recent change. Bootstraps `devlog.md` with the last 10 commits if missing. Entry format is one Markdown bullet per logical change, newest at top, including the project version, timestamp, and commit short-sha (or `[uncommitted]` for non-committed edits).
+description: >-
+  Maintain a lightweight `devlog.md` modification log at the git project root.
+  Auto-invoke after meaningful code changes in repos that already track
+  `devlog.md`, or when the user explicitly asks to update devlog. Bootstraps a
+  new `devlog.md` from recent commits when requested.
 ---
 
 # devlog — modification log convention
