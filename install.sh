@@ -5,19 +5,17 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEST="${CODEX_HOME:-$HOME/.codex}/skills"
 
 WITH_PUA=0
-WITH_EXTRA=0
 DRY_RUN=0
 
 usage() {
   cat <<'EOF'
-Usage: bash install.sh [--with-pua] [--with-extra] [--all] [--dry-run]
+Usage: bash install.sh [--with-pua] [--all] [--dry-run]
 
 Installs the core Codex skills in ./skills to ~/.codex/skills.
 
 Options:
   --with-pua     Also install optional/pua-debugging/*
-  --with-extra   Also install optional/extra-skills/*
-  --all          Install core skills plus all optional skills
+  --all          Install core skills plus optional pua-debugging skills
   --dry-run      Print actions without copying files
 EOF
 }
@@ -27,12 +25,8 @@ while [[ $# -gt 0 ]]; do
     --with-pua)
       WITH_PUA=1
       ;;
-    --with-extra)
-      WITH_EXTRA=1
-      ;;
     --all)
       WITH_PUA=1
-      WITH_EXTRA=1
       ;;
     --dry-run)
       DRY_RUN=1
@@ -78,10 +72,6 @@ install_group() {
 
 echo "Destination: $DEST"
 install_group "$ROOT/skills"
-
-if [[ "$WITH_EXTRA" -eq 1 ]]; then
-  install_group "$ROOT/optional/extra-skills"
-fi
 
 if [[ "$WITH_PUA" -eq 1 ]]; then
   install_group "$ROOT/optional/pua-debugging"

@@ -54,7 +54,6 @@ bash install.sh
 
 ```bash
 bash install.sh --with-pua
-bash install.sh --with-extra
 bash install.sh --all
 ```
 
@@ -72,16 +71,6 @@ bash install.sh --all
 | `grill-me` | 对研究计划或设计进行连续追问 | 开题前、proposal 前、方案不清楚时做压力测试 |
 
 ## 可选 Skills
-
-### `optional/extra-skills/md2wechat`
-
-用于 Markdown 到微信公众号 HTML 的转换。适合课题组有科普、公号发布或中文长文排版需求时安装。
-
-安装：
-
-```bash
-bash install.sh --with-extra
-```
 
 ### `optional/pua-debugging`
 
@@ -241,7 +230,6 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 .
 ├── skills/                  # 默认安装的核心 skills
 ├── optional/
-│   ├── extra-skills/         # 可选发布/写作类 skills
 │   └── pua-debugging/        # 可选强语气调试包
 ├── install.sh
 ├── README.md
