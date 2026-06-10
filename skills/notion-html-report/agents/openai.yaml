@@ -1,0 +1,8 @@
+interface:
+  display_name: "Notion HTML Report"
+  short_description: "Notion-like static HTML reports"
+  brand_color: "#2F6F6D"
+  default_prompt: "Use $notion-html-report to create a Notion-like Chinese HTML report with a compact left table of contents."
+
+policy:
+  allow_implicit_invocation: true
