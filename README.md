@@ -107,6 +107,55 @@ bash install.sh --with-pua
 | Documents | 文稿、DOCX、报告 | 处理文档类材料 |
 | Spreadsheets | 文献矩阵、观测记录、表格分析 | 处理表格和 xlsx |
 
+### Superpowers
+
+Superpowers 不是本仓库打包的 skill，而是推荐单独安装的 Codex skill bundle。它提供头脑风暴、写计划、执行计划、系统调试、TDD、代码 review、开发分支收尾等工作流。
+
+安装方式：
+
+```bash
+git clone https://github.com/smallocean43658/codex-superpowers.git ~/.codex/superpowers
+mkdir -p ~/.agents/skills
+ln -s ~/.codex/superpowers/skills ~/.agents/skills/superpowers
+```
+
+安装后重启 Codex。常用 skills：
+
+| Skill | 用途 |
+| --- | --- |
+| `superpowers:brainstorming` | 需求和方案头脑风暴 |
+| `superpowers:writing-plans` | 把复杂任务写成可执行计划 |
+| `superpowers:executing-plans` | 按计划逐步执行 |
+| `superpowers:systematic-debugging` | 系统化排查 bug |
+| `superpowers:test-driven-development` | TDD 工作流 |
+| `superpowers:verification-before-completion` | 完成前验证 |
+
+### 前端与视觉设计
+
+如果课题组经常做网页报告、演示页面、可交互图表或小工具，推荐启用 ECC 插件里的前端设计相关 skills。它们不是本仓库内容，但能明显提升 `notion-html-report`、`local-html-annotations`、`guizang-ppt-skill` 和自定义网页工具的质量。
+
+常用设计相关 skills：
+
+| Skill | 用途 |
+| --- | --- |
+| `frontend-design-direction` | 为网站、dashboard、工具页面确定产品化设计方向 |
+| `make-interfaces-feel-better` | 打磨间距、字体、边框、阴影、交互状态等细节 |
+| `frontend-patterns` | React / Next.js 组件、状态、性能和 UI 工程模式 |
+| `frontend-a11y` | 表单、键盘导航、ARIA、屏幕阅读器等可访问性 |
+| `design-system` | 生成或审计颜色、字体、间距、圆角、组件规范 |
+| `frontend-slides` | 制作前端驱动的网页 slides |
+| `motion-ui` / `motion-patterns` | 页面和组件动效 |
+
+可以这样让 Codex 使用：
+
+```text
+用 frontend-design-direction 和 make-interfaces-feel-better 帮我把这个 HTML 报告界面打磨得更像科研工具，而不是普通模板。
+```
+
+```text
+用 frontend-a11y 检查这个批注 UI 的键盘操作和表单标签。
+```
+
 ## NASA ADS 配置
 
 `nasa-ads-literature` 查询 ADS 时需要每个人使用自己的 ADS API token。不要共享 token，不要把 token 提交到 GitHub。
