@@ -14,7 +14,7 @@ Use this skill to inject a self-contained annotation layer into a static HTML re
 Run the bundled injector:
 
 ```bash
-python3 /Users/luoji/.codex/skills/local-html-annotations/scripts/inject_local_annotations.py /absolute/path/to/report.html
+python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.py /absolute/path/to/report.html
 ```
 
 The script is idempotent. It removes any previous annotation blocks marked by `LOCAL_ANNOTATIONS_CSS_START/END` and `LOCAL_ANNOTATIONS_JS_START/END`, then reinjects the latest CSS and JS.

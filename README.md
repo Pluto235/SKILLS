@@ -1,6 +1,6 @@
 # 天文课题组 Codex Skills 工具包
 
-这个仓库整理了一组适合课题组共享的 Codex skills，用于天文文献检索、静态报告生成、HTML 批注、组会网页 PPT、项目日志和研究计划讨论。
+这个仓库整理了一组适合课题组共享的 Codex skills，用于天文文献检索、PDF 转 LLM 可读 Markdown、静态报告生成、HTML 批注、组会网页 PPT、项目日志和研究计划讨论。
 
 仓库只包含可分享的 skills 和说明文档，不包含个人 API token、Codex 会话记录、插件缓存、模型配置、SSH 配置或本机路径历史。
 
@@ -34,7 +34,7 @@ bash install.sh
 请克隆 https://github.com/Pluto235/SKILLS.git 的 publish/lab-codex-skills-cn 分支到 ~/Documents/astro-codex-skills，先运行 bash install.sh --dry-run 给我看会安装哪些 skills；如果没问题，再运行 bash install.sh 安装到 ~/.codex/skills，并提醒我重启 Codex。
 ```
 
-本仓库不需要 GitHub Release。使用时直接拉取这个分支即可。
+日常安装建议直接拉取这个分支；需要固定版本时，可以使用仓库 tag，例如 `v2026.06.11`。
 
 ## 本地安装
 
@@ -64,6 +64,7 @@ bash install.sh --all
 | Skill | 用途 | 典型场景 |
 | --- | --- | --- |
 | `nasa-ads-literature` | NASA ADS / arXiv 天文文献检索 | 查 ADS、查 arXiv、导出 BibTeX、下载开放 PDF |
+| `mineru-pdf-to-md` | 用 MinerU 把 PDF 转为 LLM 可读 Markdown | 论文总结、翻译、精读、从 PDF 抽取正文/图片/表格 |
 | `local-html-annotations` | 给本地 HTML 报告添加离线批注功能 | 批阅报告、选中文本加评论、导出/导入批注 JSON |
 | `notion-html-report` | 把 Markdown / 研究记录渲染成 Notion 风格静态 HTML | 科研复现报告、pipeline 报告、实验总结 |
 | `guizang-ppt-skill` | 生成横向翻页网页 PPT | 组会、开题、分享、发布会风格演示 |
@@ -166,6 +167,55 @@ export ADS_DEV_KEY="你的_ADS_API_TOKEN"
 
 arXiv 查询不需要 API key。
 
+## MinerU 配置
+
+`mineru-pdf-to-md` 需要每个人本机先能运行 `mineru` 命令。本仓库只分发 Codex skill，不分发 MinerU、模型权重或模型缓存。
+
+推荐用独立 Python 环境安装 MinerU：
+
+```bash
+python3 -m venv ~/.venvs/mineru
+~/.venvs/mineru/bin/python -m pip install -U pip uv
+~/.venvs/mineru/bin/uv pip install -U "mineru[all]"
+```
+
+如果在国内网络环境下安装较慢，可以自行配置 PyPI 镜像。安装后创建命令入口：
+
+```bash
+mkdir -p ~/.local/bin
+cat > ~/.local/bin/mineru <<'EOF'
+#!/usr/bin/env bash
+export MINERU_MODEL_SOURCE="${MINERU_MODEL_SOURCE:-modelscope}"
+exec "$HOME/.venvs/mineru/bin/mineru" "$@"
+EOF
+chmod +x ~/.local/bin/mineru
+
+cat > ~/.local/bin/mineru-models-download <<'EOF'
+#!/usr/bin/env bash
+export MINERU_MODEL_SOURCE="${MINERU_MODEL_SOURCE:-modelscope}"
+exec "$HOME/.venvs/mineru/bin/mineru-models-download" "$@"
+EOF
+chmod +x ~/.local/bin/mineru-models-download
+```
+
+确认 `~/.local/bin` 在 `PATH` 里，然后下载 pipeline 模型：
+
+```bash
+mineru-models-download -s modelscope -m pipeline
+```
+
+如果系统没有 `mineru-models-download` 入口，可以直接运行：
+
+```bash
+MINERU_MODEL_SOURCE=modelscope ~/.venvs/mineru/bin/mineru-models-download -s modelscope -m pipeline
+```
+
+验证：
+
+```bash
+mineru -v
+```
+
 ## 使用示例
 
 ### 查 ADS 文献
@@ -201,6 +251,46 @@ python3 ~/.codex/skills/nasa-ads-literature/scripts/fetch_open_pdf.py \
   --output-dir ./papers
 ```
 
+### 把 PDF 转成 LLM 可读 Markdown
+
+```bash
+python3 ~/.codex/skills/mineru-pdf-to-md/scripts/pdf_to_md.py \
+  /absolute/path/to/paper.pdf
+```
+
+指定输出目录：
+
+```bash
+python3 ~/.codex/skills/mineru-pdf-to-md/scripts/pdf_to_md.py \
+  /absolute/path/to/paper.pdf \
+  --output-dir ./mineru-output
+```
+
+快速正文版，跳过公式和表格解析：
+
+```bash
+python3 ~/.codex/skills/mineru-pdf-to-md/scripts/pdf_to_md.py \
+  /absolute/path/to/paper.pdf \
+  --fast
+```
+
+扫描版或图片型 PDF：
+
+```bash
+python3 ~/.codex/skills/mineru-pdf-to-md/scripts/pdf_to_md.py \
+  /absolute/path/to/scanned.pdf \
+  --method ocr
+```
+
+输出通常包括：
+
+```text
+mineru-md/<pdf名>/txt/<pdf名>.md
+mineru-md/<pdf名>/txt/images/
+mineru-md/<pdf名>/txt/<pdf名>_content_list.json
+mineru-md/<pdf名>/txt/<pdf名>_middle.json
+```
+
 ### 给 HTML 报告加批注
 
 ```bash
@@ -229,6 +319,9 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 ```text
 .
 ├── skills/                  # 默认安装的核心 skills
+│   ├── mineru-pdf-to-md/
+│   ├── nasa-ads-literature/
+│   └── ...
 ├── optional/
 │   └── pua-debugging/        # 可选强语气调试包
 ├── install.sh
@@ -245,6 +338,8 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 - `~/.codex/auth.json`
 - Codex sessions、history、archived sessions
 - `~/.codex/plugins/cache`
+- MinerU 模型缓存，例如 `~/.cache/modelscope`、`~/.cache/huggingface`
+- PDF 论文全文、转换后的 Markdown、抽取图片，除非确认版权和分享范围允许
 - 个人服务器配置、项目路径、自动化运行记录
 
 本仓库适合公开给课题组使用，但仍建议按“可能公开泄露”的标准处理。

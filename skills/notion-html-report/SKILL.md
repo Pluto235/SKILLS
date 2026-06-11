@@ -34,7 +34,7 @@ toc: true
 3. Use the bundled renderer:
 
 ```bash
-python /Users/luoji/.codex/skills/notion-html-report/scripts/render_notion_report.py input.md --output report.html
+python ~/.codex/skills/notion-html-report/scripts/render_notion_report.py input.md --output report.html
 ```
 
 4. Validate the generated HTML locally. Check that headings, TOC anchors, tables, figures, links, and mobile layout are usable.
