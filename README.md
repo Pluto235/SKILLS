@@ -67,9 +67,27 @@ bash install.sh --all
 | `mineru-pdf-to-md` | 用 MinerU 把 PDF 转为 LLM 可读 Markdown | 论文总结、翻译、精读、从 PDF 抽取正文/图片/表格 |
 | `local-html-annotations` | 给本地 HTML 报告添加离线批注功能 | 批阅报告、选中文本加评论、导出/导入批注 JSON |
 | `notion-html-report` | 把 Markdown / 研究记录渲染成 Notion 风格静态 HTML | 科研复现报告、pipeline 报告、实验总结 |
+| `html-ppt` / `html-ppt-skill` | 用 HTML/CSS/JS 生成模板化演示文稿 | 技术分享、组会报告、演讲者模式、网页 slides、截图导出 |
 | `guizang-ppt-skill` | 生成横向翻页网页 PPT | 组会、开题、分享、发布会风格演示 |
 | `devlog` | 维护项目 `devlog.md` 修改日志 | 记录代码改动、实验进展、项目历史 |
 | `grill-me` | 对研究计划或设计进行连续追问 | 开题前、proposal 前、方案不清楚时做压力测试 |
+
+### HTML PPT Skill
+
+`html-ppt-skill` 来自 <https://github.com/lewislulu/html-ppt-skill>，原始 skill 名称是 `html-ppt`，MIT 许可。本仓库把它放在 `skills/html-ppt-skill/`，便于和本地目录名保持一致；Codex 触发时通常会显示为 `html-ppt`。
+
+它适合做更模板化、组件化的 HTML 演示文稿，特点包括：
+
+- 多套主题 CSS、单页布局模板和完整 deck 模板
+- 键盘导航、主题切换、动画、演讲者模式
+- 技术分享、课程模块、pitch deck、周报、小红书图文等模板
+- 可用脚本 scaffold 新 deck，并用 headless Chrome 导出 PNG
+
+与 `guizang-ppt-skill` 的关系：
+
+- `html-ppt` 更像一个模板库和 HTML PPT Studio，适合快速从现成主题/布局搭建演示。
+- `guizang-ppt-skill` 更偏向已有课题组网页 PPT 风格和本仓库既有模板。
+- 两者都可以保留；实际做 slides 时按目标风格选择。
 
 ## 可选 Skills
 
@@ -363,6 +381,29 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 
 打开 HTML 后，点击右下角 `批注` 按钮，选中文本即可添加评论。批注默认保存在浏览器 `localStorage`，可以导出 JSON 备份。
 
+### 生成 HTML PPT
+
+使用 `html-ppt`：
+
+```bash
+cd ~/.codex/skills/html-ppt-skill
+./scripts/new-deck.sh my-talk
+open examples/my-talk/index.html
+```
+
+渲染截图：
+
+```bash
+cd ~/.codex/skills/html-ppt-skill
+./scripts/render.sh examples/my-talk/index.html 8 out/my-talk
+```
+
+也可以直接对 Codex 说：
+
+```text
+用 html-ppt 帮我做一份 12 页 blazar QPO 组会技术分享 slides，使用 academic-paper 或 tokyo-night 风格，并带演讲者 notes。
+```
+
 ### 给 Codex 的自然语言指令
 
 ```text
@@ -382,6 +423,7 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 ```text
 .
 ├── skills/                  # 默认安装的核心 skills
+│   ├── html-ppt-skill/
 │   ├── mineru-pdf-to-md/
 │   ├── nasa-ads-literature/
 │   └── ...
@@ -409,4 +451,4 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 
 ## 许可证
 
-仓库中的不同 skill 可能来自不同来源。`guizang-ppt-skill` 保留其原始 LICENSE 和 README。其他由本仓库整理的本地 skills 见各自目录说明；如需正式公开发布，请在发布前再做一次逐项 license 审查。
+仓库中的不同 skill 可能来自不同来源。`guizang-ppt-skill` 保留其原始 LICENSE 和 README。`html-ppt-skill` 来自 `lewislulu/html-ppt-skill`，保留其 MIT LICENSE、README 和原始目录结构。其他由本仓库整理的本地 skills 见各自目录说明；如需正式公开发布，请在发布前再做一次逐项 license 审查。
