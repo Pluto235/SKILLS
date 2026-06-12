@@ -67,10 +67,29 @@ bash install.sh --all
 | `mineru-pdf-to-md` | 用 MinerU 把 PDF 转为 LLM 可读 Markdown | 论文总结、翻译、精读、从 PDF 抽取正文/图片/表格 |
 | `local-html-annotations` | 给本地 HTML 报告添加离线批注功能 | 批阅报告、选中文本加评论、导出/导入批注 JSON |
 | `notion-html-report` | 把 Markdown / 研究记录渲染成 Notion 风格静态 HTML | 科研复现报告、pipeline 报告、实验总结 |
+| `frontend-slides` | 生成设计感更强的单文件 HTML slides，也可转换 PPTX | 组会、conference talk、pitch deck、PPTX 转网页、PDF 导出 |
 | `html-ppt` / `html-ppt-skill` | 用 HTML/CSS/JS 生成模板化演示文稿 | 技术分享、组会报告、演讲者模式、网页 slides、截图导出 |
 | `guizang-ppt-skill` | 生成横向翻页网页 PPT | 组会、开题、分享、发布会风格演示 |
 | `devlog` | 维护项目 `devlog.md` 修改日志 | 记录代码改动、实验进展、项目历史 |
 | `grill-me` | 对研究计划或设计进行连续追问 | 开题前、proposal 前、方案不清楚时做压力测试 |
+
+### Frontend Slides
+
+`frontend-slides` 来自 <https://github.com/zarazhangrui/frontend-slides>，MIT 许可。本仓库把它放在 `skills/frontend-slides/`，安装后可以直接让 Codex 使用 `frontend-slides`。
+
+它适合做“先看视觉方案、再生成完整 slides”的演示文稿工作流，特点包括：
+
+- 生成零依赖、单文件 HTML slides，CSS/JS 内联，方便分享和归档
+- 固定 1920×1080 的 16:9 舞台，整体缩放到浏览器窗口，适合演示和截图
+- 先生成 3 个视觉风格预览，让用户选择或混合风格
+- 支持从 PPTX 抽取文字、图片和 speaker notes，再转成网页 slides
+- 自带 PDF 导出和 Vercel 部署脚本
+
+与 `html-ppt` / `guizang-ppt-skill` 的关系：
+
+- `frontend-slides` 更强调视觉探索、完整单文件交付、PPTX 转网页、PDF/URL 分享。
+- `html-ppt` 更像模板库和 HTML PPT Studio，适合从现成主题、布局和完整 deck 模板快速搭建。
+- `guizang-ppt-skill` 更偏课题组已有网页 PPT 风格。
 
 ### HTML PPT Skill
 
@@ -381,7 +400,26 @@ python3 ~/.codex/skills/local-html-annotations/scripts/inject_local_annotations.
 
 打开 HTML 后，点击右下角 `批注` 按钮，选中文本即可添加评论。批注默认保存在浏览器 `localStorage`，可以导出 JSON 备份。
 
-### 生成 HTML PPT
+### 生成 HTML Slides
+
+使用 `frontend-slides`：
+
+```text
+用 frontend-slides 帮我做一份 12 页 blazar QPO conference talk。低密度、speaker-led、视觉风格要偏学术但不要像普通 Beamer。
+```
+
+转换已有 PPTX：
+
+```text
+用 frontend-slides 把 /absolute/path/to/slides.pptx 转成网页 slides，保留图片、文字和 speaker notes，并先给我看 3 个视觉预览。
+```
+
+导出 PDF：
+
+```bash
+cd ~/.codex/skills/frontend-slides
+bash scripts/export-pdf.sh /absolute/path/to/presentation.html /absolute/path/to/presentation.pdf
+```
 
 使用 `html-ppt`：
 
@@ -423,6 +461,7 @@ cd ~/.codex/skills/html-ppt-skill
 ```text
 .
 ├── skills/                  # 默认安装的核心 skills
+│   ├── frontend-slides/
 │   ├── html-ppt-skill/
 │   ├── mineru-pdf-to-md/
 │   ├── nasa-ads-literature/
@@ -451,4 +490,4 @@ cd ~/.codex/skills/html-ppt-skill
 
 ## 许可证
 
-仓库中的不同 skill 可能来自不同来源。`guizang-ppt-skill` 保留其原始 LICENSE 和 README。`html-ppt-skill` 来自 `lewislulu/html-ppt-skill`，保留其 MIT LICENSE、README 和原始目录结构。其他由本仓库整理的本地 skills 见各自目录说明；如需正式公开发布，请在发布前再做一次逐项 license 审查。
+仓库中的不同 skill 可能来自不同来源。`guizang-ppt-skill` 保留其原始 LICENSE 和 README。`html-ppt-skill` 来自 `lewislulu/html-ppt-skill`，保留其 MIT LICENSE、README 和原始目录结构。`frontend-slides` 来自 `zarazhangrui/frontend-slides`，保留其 MIT LICENSE、README 和原始目录结构。其他由本仓库整理的本地 skills 见各自目录说明；如需正式公开发布，请在发布前再做一次逐项 license 审查。
