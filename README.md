@@ -92,10 +92,73 @@ bash install.sh --with-pua
 | 插件 | 推荐用途 | 说明 |
 | --- | --- | --- |
 | Browser | HTML 报告、批注 UI、网页 PPT | 打开本地 HTML、点击测试、截图验证 |
-| ECC | 文献综述、网页检索、工程质量 | 提供 `exa-search`、`deep-research`、`literature-review`、`pubmed-database` 等研究/工程 skills |
+| ECC | 文献综述、网页检索、工程质量 | 提供 200+ 个研究、工程、前端、测试、安全、自动化 skills 和 MCP 工具配置 |
 | Presentations | 正式 slides / PPTX | 生成和检查演示文稿 |
 | Documents | 文稿、DOCX、报告 | 处理文档类材料 |
 | Spreadsheets | 文献矩阵、观测记录、表格分析 | 处理表格和 xlsx |
+
+### ECC
+
+ECC 是一个大型 Codex / Claude Code skill bundle 和插件包，官方仓库是：
+
+- GitHub: <https://github.com/affaan-m/ECC>
+- Website: <https://ecc.tools>
+
+它不属于本仓库内容，本仓库也不会提交 ECC 插件缓存。建议把 ECC 当作“可选增强层”：本仓库提供课题组常用的、稳定的本地 skills；ECC 提供更广的通用工作流、MCP 工具和工程能力。
+
+ECC 插件一般包括：
+
+- **Research / literature**：`deep-research`、`literature-review`、`research-ops`、`scholar-evaluation`、`gget`、`pubmed-database`
+- **Web / retrieval**：`exa-search`、`documentation-lookup`、`search-first`、`iterative-retrieval`
+- **Frontend / design**：`frontend-design-direction`、`make-interfaces-feel-better`、`frontend-patterns`、`frontend-a11y`、`design-system`
+- **Engineering workflow**：`tdd-workflow`、`verification-loop`、`codebase-onboarding`、`git-workflow`、`github-ops`
+- **Security / quality**：`security-review`、`security-scan`、`safety-guard`、`production-audit`
+- **Architecture / planning**：`architecture-decision-records`、`api-design`、`backend-patterns`、`agentic-engineering`
+- **Language / framework patterns**：Python、FastAPI、Django、React/Next/Vite、Go、Rust、Java、Spring Boot、Laravel、Flutter、Kotlin、Swift 等
+
+ECC 还会随插件提供一组 MCP server 配置，常见包括：
+
+| MCP server | 用途 |
+| --- | --- |
+| `exa` | 语义网页搜索和内容抓取 |
+| `context7` | 查询最新库文档和代码示例 |
+| `github` | GitHub 仓库、issue、PR、文件操作 |
+| `playwright` | 浏览器自动化、网页截图和 E2E 验证 |
+| `memory` | 跨会话记忆 |
+| `sequential-thinking` | 分步推理辅助 |
+
+Codex 插件安装方式会随 Codex 插件系统变化。ECC 当前文档给出的 repo marketplace 安装方式是：
+
+```bash
+codex plugin marketplace add affaan-m/ECC
+```
+
+也可以使用本地 checkout：
+
+```bash
+git clone https://github.com/affaan-m/ECC.git ~/Documents/ECC
+codex plugin marketplace add ~/Documents/ECC
+```
+
+安装或更新后重启 Codex，再在 Codex 插件目录里启用 `ecc`。如果 Codex 的插件系统版本不同，以 ECC 仓库 README 和 `.codex-plugin/README.md` 为准。
+
+适合课题组的调用例子：
+
+```text
+用 deep-research 和 literature-review 帮我围绕 blazar QPO 做一轮文献调研，列出证据链和争议点。
+```
+
+```text
+用 exa-search 查最近一年的 Fermi-LAT blazar QPO 相关网页和论文线索，并给出来源链接。
+```
+
+```text
+用 frontend-design-direction 和 make-interfaces-feel-better 把这个科研报告 HTML 打磨成更适合组会展示的界面。
+```
+
+```text
+用 tdd-workflow 和 verification-loop 修改这个 Python 分析脚本，先补测试，再实现功能并验证结果。
+```
 
 ### Superpowers
 
