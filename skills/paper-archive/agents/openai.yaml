@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Archive"
+  short_description: "Archive papers into the hard-coded IDEA paper library."
+  default_prompt: "Archive this paper into my IDEA paper library."
