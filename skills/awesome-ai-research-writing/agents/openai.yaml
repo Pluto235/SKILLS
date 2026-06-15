@@ -1,0 +1,4 @@
+interface:
+  display_name: "Awesome AI Research Writing"
+  short_description: "科研论文写作、翻译、润色与审稿 prompt 工作流"
+  default_prompt: "帮我润色/翻译/审视这段科研论文内容。"

@@ -72,6 +72,16 @@ bash install.sh --all
 | `guizang-ppt-skill` | 生成横向翻页网页 PPT | 组会、开题、分享、发布会风格演示 |
 | `devlog` | 维护项目 `devlog.md` 修改日志 | 记录代码改动、实验进展、项目历史 |
 | `grill-me` | 对研究计划或设计进行连续追问 | 开题前、proposal 前、方案不清楚时做压力测试 |
+| `awesome-ai-research-writing` | 科研论文写作 prompt/工作流索引 | 中英翻译、LaTeX/Word 润色、逻辑检查、图表标题、reviewer 视角审稿 |
+| `ml-paper-writing` | ML/AI 顶会论文写作 | NeurIPS/ICML/ICLR/ACL/AAAI/COLM 初稿、引用核验、camera-ready 检查 |
+| `systems-paper-writing` | 系统方向论文写作 | OSDI/SOSP/ASPLOS/NSDI/EuroSys 结构、段落蓝图、评审 checklist |
+| `academic-plotting` | 论文级图表和方法图生成指导 | 实验图、消融图、architecture/pipeline 图、LaTeX 论文插图规范 |
+| `presenting-conference-talks` | 从论文生成会议报告 slides | oral、spotlight、poster talk、speaker notes、Beamer/PPTX 结构 |
+| `humanizer` | 去除明显 AI 写作痕迹 | 投稿前润色、降低机械连接词、破折号滥用、空泛表达 |
+| `docx` | DOCX 文档创建、编辑、修订 | Word 投稿模板填充、tracked changes、文档审稿 |
+| `doc-coauthoring` | 分阶段文档协作写作 | 按节头脑风暴、起草、精修、读者测试 |
+| `canvas-design` | 论文概念图/示意图设计 | 生成 design philosophy 和单页 PNG/PDF 视觉稿 |
+| `arxiv-translator` | 从 arXiv LaTeX 源码翻译并重新编译 | arXiv 论文翻译、保留公式和图表、编译中文 PDF |
 
 ### Frontend Slides
 
