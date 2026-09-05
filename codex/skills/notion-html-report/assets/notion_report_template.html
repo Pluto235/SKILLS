@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <style>
+{{ css }}
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="toc-panel" aria-label="目录">
+      <div class="toc-title">目录</div>
+      {{ toc }}
+    </aside>
+    <main class="document">
+      <header class="doc-header">
+        <div class="doc-kicker">{{ kicker }}</div>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">{{ subtitle }}</p>
+        <div class="meta-line">{{ meta }}</div>
+      </header>
+      <article class="doc-body">
+{{ body }}
+      </article>
+    </main>
+  </div>
+</body>
+</html>

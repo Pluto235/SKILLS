@@ -8,7 +8,11 @@ const CONFIG = {
   legacyReport: '/Users/luoji/Documents/micu_api_usage_report_2026-05-18_to_2026-05-22.html',
   snapshotDir: '/Users/luoji/Documents/micu_api_snapshots',
   reportDir: '/Users/luoji/Documents/micu_api_reports',
-  browserCacheDir: path.join(os.homedir(), 'Library/Application Support/Codex/Partitions/codex-browser-app/Cache/Cache_Data'),
+  browserCacheDirs: [
+    path.join(os.homedir(), 'Library/Application Support/Codex/Default/Partitions/codex-browser-app/Cache/Cache_Data'),
+    path.join(os.homedir(), 'Library/Application Support/Codex/Partitions/codex-browser-app/Cache/Cache_Data'),
+    path.join(os.homedir(), 'Library/Application Support/Codex/Cache/Cache_Data'),
+  ],
   tokenUrlHint: 'https://www.micuapi.ai/api/token/',
   loginUrl: 'https://www.micuapi.ai/console/token',
   timeZone: 'Asia/Shanghai',
@@ -18,6 +22,11 @@ const CONFIG = {
 const GROUP_KIND = {
   vip_2: 'Codex token',
   vip_1_max_enterprise: 'Claude Code token',
+  vip_2_cc: 'Claude Code token',
+};
+
+const TOKEN_IDENTITY_ALIASES = {
+  'shijiemac-cc::vip_2_cc': 'shijiemac-cc::vip_1_max_enterprise',
 };
 
 function pad(n) {
@@ -70,7 +79,8 @@ function roundMoney(n) {
 }
 
 function keyOf(row) {
-  return `${row.name}::${row.group}`;
+  const key = `${row.name}::${row.group}`;
+  return TOKEN_IDENTITY_ALIASES[key] || key;
 }
 
 function writeJson(file, data) {
@@ -151,41 +161,107 @@ function findGzipJsonPayloads(buffer) {
 }
 
 function findLatestTokenCacheResponse() {
-  if (!fs.existsSync(CONFIG.browserCacheDir)) {
-    throw new Error(`Browser cache directory not found: ${CONFIG.browserCacheDir}`);
+  const cacheDirs = CONFIG.browserCacheDirs.filter((dir) => fs.existsSync(dir));
+  if (!cacheDirs.length) {
+    throw new Error(`Browser cache directories not found: ${CONFIG.browserCacheDirs.join(', ')}`);
   }
 
   const candidates = [];
-  for (const name of fs.readdirSync(CONFIG.browserCacheDir)) {
-    const file = path.join(CONFIG.browserCacheDir, name);
-    let stat;
-    try {
-      stat = fs.statSync(file);
-      if (!stat.isFile()) continue;
-      const buffer = fs.readFileSync(file);
-      if (!buffer.includes(Buffer.from(CONFIG.tokenUrlHint))) continue;
-      for (const payload of findGzipJsonPayloads(buffer)) {
-        let json;
-        try {
-          json = JSON.parse(payload.text);
-        } catch (_) {
-          continue;
+  for (const cacheDir of cacheDirs) {
+    for (const name of fs.readdirSync(cacheDir)) {
+      const file = path.join(cacheDir, name);
+      let stat;
+      try {
+        stat = fs.statSync(file);
+        if (!stat.isFile()) continue;
+        const buffer = fs.readFileSync(file);
+        if (!buffer.includes(Buffer.from(CONFIG.tokenUrlHint))) continue;
+        for (const payload of findGzipJsonPayloads(buffer)) {
+          let json;
+          try {
+            json = JSON.parse(payload.text);
+          } catch (_) {
+            continue;
+          }
+          const data = json.data;
+          if (!data || !Array.isArray(data.items) || typeof data.total !== 'number') continue;
+          if (typeof data.page !== 'number' || typeof data.page_size !== 'number') continue;
+          candidates.push({ file, name, stat, json, data, cacheDir });
         }
-        const data = json.data;
-        if (!data || !Array.isArray(data.items) || typeof data.total !== 'number') continue;
-        if (data.items.length < data.total) continue;
-        candidates.push({ file, name, stat, json, data });
+      } catch (_) {
+        // Ignore cache files that disappear or cannot be decoded.
       }
-    } catch (_) {
-      // Ignore cache files that disappear or cannot be decoded.
     }
   }
 
-  candidates.sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
-  if (!candidates.length) {
-    throw new Error(`No full token API cache response found. Open and refresh ${CONFIG.loginUrl}, then rerun.`);
+  const completeResponses = candidates.filter((candidate) => candidate.data.items.length >= candidate.data.total);
+  const paginatedResponses = completePaginatedTokenCacheResponses(candidates);
+  const completeCandidates = [...completeResponses, ...paginatedResponses]
+    .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs);
+
+  if (!completeCandidates.length) {
+    throw new Error(`No complete token API cache response found. Open and refresh ${CONFIG.loginUrl}, then rerun.`);
   }
-  return candidates[0];
+  return completeCandidates[0];
+}
+
+function completePaginatedTokenCacheResponses(candidates) {
+  const byTotalAndPageSize = new Map();
+  for (const candidate of candidates) {
+    const { page, page_size: pageSize, total, items } = candidate.data;
+    if (!Number.isInteger(page) || !Number.isInteger(pageSize) || page < 1 || pageSize < 1) continue;
+    if (!items.length || items.length > pageSize || total <= pageSize) continue;
+    const key = `${total}:${pageSize}`;
+    if (!byTotalAndPageSize.has(key)) byTotalAndPageSize.set(key, new Map());
+    const pages = byTotalAndPageSize.get(key);
+    const existing = pages.get(page);
+    if (!existing || candidate.stat.mtimeMs > existing.stat.mtimeMs) {
+      pages.set(page, candidate);
+    }
+  }
+
+  const complete = [];
+  for (const [key, pages] of byTotalAndPageSize) {
+    const [total, pageSize] = key.split(':').map(Number);
+    const expectedPages = Math.ceil(total / pageSize);
+    const pageCandidates = [];
+    for (let page = 1; page <= expectedPages; page += 1) {
+      const candidate = pages.get(page);
+      if (!candidate) {
+        pageCandidates.length = 0;
+        break;
+      }
+      pageCandidates.push(candidate);
+    }
+    if (!pageCandidates.length) continue;
+
+    const items = pageCandidates.flatMap((candidate) => candidate.data.items).slice(0, total);
+    if (items.length < total) continue;
+    const newest = pageCandidates.reduce((latest, candidate) => (
+      candidate.stat.mtimeMs > latest.stat.mtimeMs ? candidate : latest
+    ), pageCandidates[0]);
+
+    complete.push({
+      ...newest,
+      data: {
+        ...newest.data,
+        page: 1,
+        page_size: pageSize,
+        total,
+        items,
+      },
+      pageSources: pageCandidates.map((candidate) => ({
+        page: candidate.data.page,
+        page_size: candidate.data.page_size,
+        total: candidate.data.total,
+        count: candidate.data.items.length,
+        file: path.basename(candidate.file),
+        cache_dir: candidate.cacheDir,
+        cache_mtime: candidate.stat.mtime.toISOString(),
+      })),
+    });
+  }
+  return complete;
 }
 
 function snapshotFromTokenResponse(candidate) {
@@ -205,15 +281,139 @@ function snapshotFromTokenResponse(candidate) {
 
   return {
     captured_at: nowString(),
-    source: `Codex browser cache ${CONFIG.tokenUrlHint}?p=1&size=100; contains all ${candidate.data.total} tokens`,
-    page_sources: [{
+    source: candidate.pageSources
+      ? `Codex browser cache ${CONFIG.tokenUrlHint}; assembled ${candidate.pageSources.length} paginated response(s), contains all ${candidate.data.total} tokens`
+      : `Codex browser cache ${CONFIG.tokenUrlHint}?p=${candidate.data.page}&size=${candidate.data.page_size}; contains all ${candidate.data.total} tokens`,
+    page_sources: candidate.pageSources || [{
       page: candidate.data.page,
       page_size: candidate.data.page_size,
       total: candidate.data.total,
       count: candidate.data.items.length,
       file: path.basename(candidate.file),
+      cache_dir: candidate.cacheDir,
       cache_mtime: candidate.stat.mtime.toISOString(),
     }],
+    identity: 'name+group',
+    tokens,
+  };
+}
+
+function parseLiveTokenPageText(text) {
+  const lines = String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const tableTokens = parseLiveTokenTableText(lines);
+  if (tableTokens.length) return tableTokens;
+
+  const tokens = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    if (lines[i] !== 'Name') continue;
+    const nextNameIndex = lines.indexOf('Name', i + 1);
+    const segment = lines.slice(i, nextNameIndex === -1 ? lines.length : nextNameIndex);
+    if (!segment.includes('Remaining/Total') || !segment.includes('Group') || !segment.includes('Last used time')) {
+      continue;
+    }
+
+    const valueAfter = (label) => {
+      const index = segment.indexOf(label);
+      return index === -1 ? '' : segment[index + 1] || '';
+    };
+    const amount = valueAfter('Remaining/Total').match(/¥([\d,.]+)\s*\/\s*¥([\d,.]+)/);
+    const groupIndex = segment.indexOf('Group');
+    const group = groupIndex === -1 ? '' : segment[groupIndex + 1] || '';
+    const ratio = groupIndex === -1 ? '' : segment[groupIndex + 2] || '';
+    if (!amount || !group) continue;
+
+    tokens.push({
+      name: segment[1],
+      group,
+      kind: GROUP_KIND[group] || 'Other token',
+      ratio: /x$/.test(ratio) ? ratio : '',
+      remaining: Number(amount[1].replace(/,/g, '')),
+      total: Number(amount[2].replace(/,/g, '')),
+      last_used: valueAfter('Last used time'),
+    });
+  }
+
+  return tokens;
+}
+
+function parseLiveTokenTableText(lines) {
+  const headerIndex = lines.findIndex((line) => (
+    line.includes('Name')
+    && line.includes('Status')
+    && line.includes('Remaining/Total')
+    && line.includes('Group')
+    && line.includes('Last used time')
+  ));
+  if (headerIndex === -1) return [];
+
+  const tokens = [];
+  const amountRe = /^¥([\d,.]+)\s*\/\s*¥([\d,.]+)$/;
+  const dateTimeRe = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+  for (let i = headerIndex + 1; i < lines.length - 3; i += 1) {
+    if (/^(Showing|Total pages:|Items per page:)$/.test(lines[i])) break;
+    if (!/^(Enabled|Disabled)$/.test(lines[i + 1])) continue;
+    const amount = lines[i + 2].match(amountRe);
+    const group = lines[i + 3];
+    if (!amount || !group || !group.startsWith('vip_')) continue;
+
+    const dateTimes = [];
+    for (let j = i + 4; j < Math.min(lines.length, i + 16); j += 1) {
+      if (dateTimeRe.test(lines[j])) dateTimes.push(lines[j]);
+      if (dateTimes.length === 3) break;
+    }
+    if (dateTimes.length < 2) continue;
+
+    const ratio = lines[i + 4] || '';
+    tokens.push({
+      name: lines[i],
+      group,
+      kind: GROUP_KIND[group] || 'Other token',
+      ratio: /x$/.test(ratio) ? ratio : '',
+      remaining: Number(amount[1].replace(/,/g, '')),
+      total: Number(amount[2].replace(/,/g, '')),
+      last_used: dateTimes[1],
+    });
+  }
+
+  return tokens;
+}
+
+function snapshotFromLiveTokenPageTextFiles(date) {
+  const files = [
+    path.join(CONFIG.reportDir, `${date}_live_token_page_body.txt`),
+    path.join(CONFIG.reportDir, `${date}_live_token_page2_body.txt`),
+  ].filter((file) => fs.existsSync(file));
+  if (!files.length) return null;
+
+  const pageTexts = files.map((file) => ({ file, text: fs.readFileSync(file, 'utf8') }));
+  const pageCount = Math.max(1, ...pageTexts.flatMap(({ text }) => (
+    [...text.matchAll(/\b\d+\/(\d+)\b/g)].map((match) => Number(match[1]))
+  )));
+  if (pageTexts.length < pageCount) {
+    throw new Error(`Live token page text is incomplete: found ${pageTexts.length} page file(s), page marker expects ${pageCount}.`);
+  }
+
+  const byIdentity = new Map();
+  for (const { text } of pageTexts) {
+    for (const token of parseLiveTokenPageText(text)) {
+      byIdentity.set(keyOf(token), token);
+    }
+  }
+  const tokens = [...byIdentity.values()];
+  if (!tokens.length) return null;
+
+  return {
+    captured_at: nowString(),
+    source: `Codex in-app browser live Token Management text; ${pageTexts.length} page file(s), ${tokens.length} token(s)`,
+    page_sources: pageTexts.map(({ file, text }, index) => ({
+      page: index + 1,
+      file,
+      token_count: parseLiveTokenPageText(text).length,
+    })),
     identity: 'name+group',
     tokens,
   };
@@ -319,10 +519,10 @@ function compareSnapshots(previous, current) {
 
 function renderReport(previous, current, comparison, freshness) {
   const codexTotal = comparison.normal
-    .filter((row) => row.group === 'vip_2')
+    .filter((row) => row.kind === 'Codex token')
     .reduce((sum, row) => sum + row.period_usage, 0);
   const claudeTotal = comparison.normal
-    .filter((row) => row.group === 'vip_1_max_enterprise')
+    .filter((row) => row.kind === 'Claude Code token')
     .reduce((sum, row) => sum + row.period_usage, 0);
   const total = comparison.normal.reduce((sum, row) => sum + row.period_usage, 0);
   const top = comparison.normal[0];
@@ -424,14 +624,14 @@ function renderReport(previous, current, comparison, freshness) {
       <div class="metrics">
         <div class="metric"><div class="label">本期总消耗</div><div class="value">${money(total)}</div><div class="note">正常匹配及新增 token 合计</div></div>
         <div class="metric"><div class="label">消耗最高 Token</div><div class="value">${top ? escapeHtml(top.name) : '-'}</div><div class="note">${top ? `${escapeHtml(top.group)} / ${money(top.period_usage)}` : '-'}</div></div>
-        <div class="metric"><div class="label">Codex token 消耗</div><div class="value">${money(codexTotal)}</div><div class="note">vip_2 分组合计</div></div>
-        <div class="metric"><div class="label">Claude Code token 消耗</div><div class="value">${money(claudeTotal)}</div><div class="note">vip_1_max_enterprise 分组合计</div></div>
+        <div class="metric"><div class="label">Codex token 消耗</div><div class="value">${money(codexTotal)}</div><div class="note">Codex token 类型合计</div></div>
+        <div class="metric"><div class="label">Claude Code token 消耗</div><div class="value">${money(claudeTotal)}</div><div class="note">Claude Code token 类型合计</div></div>
       </div>
     </section>
 
     <section>
       <h2>每个 API / Token 本期消耗</h2>
-      <p class="small">按本期消耗金额从大到小排序；vip_2 分组为 Codex token，vip_1_max_enterprise 分组为 Claude Code token。</p>
+      <p class="small">按本期消耗金额从大到小排序；类型列按当前分组映射归类，包含已知迁移别名。</p>
       <table>
         <thead>
           <tr>
@@ -472,8 +672,8 @@ function escapeHtml(value) {
 
 function usageSummary(comparison) {
   const total = comparison.normal.reduce((sum, row) => sum + row.period_usage, 0);
-  const codex = comparison.normal.filter((row) => row.group === 'vip_2').reduce((sum, row) => sum + row.period_usage, 0);
-  const claude = comparison.normal.filter((row) => row.group === 'vip_1_max_enterprise').reduce((sum, row) => sum + row.period_usage, 0);
+  const codex = comparison.normal.filter((row) => row.kind === 'Codex token').reduce((sum, row) => sum + row.period_usage, 0);
+  const claude = comparison.normal.filter((row) => row.kind === 'Claude Code token').reduce((sum, row) => sum + row.period_usage, 0);
   return {
     total_usage: roundMoney(total),
     codex_usage: roundMoney(codex),
@@ -493,8 +693,11 @@ function main() {
   let current;
   let freshness;
   try {
-    const candidate = findLatestTokenCacheResponse();
-    current = snapshotFromTokenResponse(candidate);
+    current = snapshotFromLiveTokenPageTextFiles(date);
+    if (!current) {
+      const candidate = findLatestTokenCacheResponse();
+      current = snapshotFromTokenResponse(candidate);
+    }
     freshness = validateFreshness(current);
     if (!freshness.ok) {
       const failureFile = path.join(CONFIG.reportDir, `${date}_period_api_usage_failure.json`);

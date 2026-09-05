@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-SAFE_TOP_LEVEL = {"model_reasoning_effort", "disable_response_storage"}
-SAFE_TABLE_PREFIXES = ("plugins.",)
+SAFE_TOP_LEVEL = {"model", "model_reasoning_effort", "disable_response_storage"}
+SAFE_TABLE_PREFIXES = ("plugins.", "desktop")
 
 
 def parse_simple_toml(text: str) -> tuple[dict[str, str], dict[str, dict[str, str]]]:

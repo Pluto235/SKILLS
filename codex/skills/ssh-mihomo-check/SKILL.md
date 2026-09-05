@@ -15,7 +15,7 @@ Run the bundled script instead of reconstructing ad hoc SSH, API, and probe comm
 2. Run the bundled script:
 
 ```bash
-python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py TARGET
+python3 /Users/luoji/.agents/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py TARGET
 ```
 
 3. Default behavior:
@@ -43,25 +43,25 @@ python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.p
 Normal repair run:
 
 ```bash
-python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py ETO
+python3 /Users/luoji/.agents/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py ETO
 ```
 
 Inspection only:
 
 ```bash
-python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py PDC --no-switch
+python3 /Users/luoji/.agents/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py PDC --no-switch
 ```
 
 Structured output:
 
 ```bash
-python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py ETO --json
+python3 /Users/luoji/.agents/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py ETO --json
 ```
 
 Custom group or probe:
 
 ```bash
-python3 /Users/luoji/.codex/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py user@example-host --group MySelector --probe-url https://example.com/generate_204
+python3 /Users/luoji/.agents/skills/ssh-mihomo-check/scripts/check_mihomo_proxy.py user@example-host --group MySelector --probe-url https://example.com/generate_204
 ```
 
 ## Resource

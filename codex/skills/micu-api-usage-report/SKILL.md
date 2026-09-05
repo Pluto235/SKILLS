@@ -34,7 +34,7 @@ Use this skill for the user's Micu API quota reports. The report is a snapshot-t
 Run the bundled script:
 
 ```bash
-node /Users/luoji/.codex/skills/micu-api-usage-report/scripts/micu_usage_report.js
+node /Users/luoji/.agents/skills/micu-api-usage-report/scripts/micu_usage_report.js
 ```
 
 The script will:

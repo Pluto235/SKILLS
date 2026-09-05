@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local HTML Annotations"
+  short_description: "Add offline annotation tools to static HTML reports."
+  default_prompt: "Add local annotation mode to this static HTML report."

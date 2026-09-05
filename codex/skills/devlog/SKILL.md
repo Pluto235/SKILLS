@@ -1,10 +1,8 @@
 ---
 name: devlog
 description: >-
-  Maintain a lightweight `devlog.md` modification log at the git project root.
-  Auto-invoke after meaningful code changes in repos that already track
-  `devlog.md`, or when the user explicitly asks to update devlog. Bootstraps a
-  new `devlog.md` from recent commits when requested.
+  Maintain a lightweight devlog.md at a git project root after meaningful code
+  changes, or when the user explicitly asks to create or update a devlog entry.
 ---
 
 # devlog — modification log convention
@@ -85,7 +83,7 @@ When invoked and `devlog.md` does not exist at the git root:
    ```markdown
    # <version> devlog
 
-   Lightweight running log of Claude-mediated modifications.
+   Lightweight running log of Codex-mediated modifications.
    Newest at top. Format: `- **<version>** · YYYY-MM-DD HH:MM · [<sha>] <summary>`.
    Detailed design rationale → `docs/`. Authoritative history → `git log`.
 
@@ -104,10 +102,10 @@ When invoked and `devlog.md` does not exist at the git root:
    so the bootstrap doesn't get tangled with the user's substantive
    change. Then proceed to commit / log the actual change.
 
-## Updating `CLAUDE.md` (optional)
+## Updating `AGENTS.md` (optional)
 
-If the project already has a `CLAUDE.md` and the user is using this
-skill globally (i.e., it lives in `~/.claude/skills/`), the per-repo
+If the project already has a `AGENTS.md` and the user is using this
+skill globally (i.e., it lives in `~/.agents/skills/`), the per-repo
 "Modification log convention" section is redundant. Do NOT trim it
 without asking — some users want explicit per-repo notes. If asked
 to clean up, replace it with one line:

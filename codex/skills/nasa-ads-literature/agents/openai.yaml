@@ -1,0 +1,4 @@
+interface:
+  display_name: "NASA ADS Literature"
+  short_description: "Search NASA ADS and arXiv astronomy papers."
+  default_prompt: "Search NASA ADS or arXiv for astronomy literature, summarize key metadata, and retrieve open-access paper links."

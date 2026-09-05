@@ -1,0 +1,4 @@
+interface:
+  display_name: "MinerU PDF To Markdown"
+  short_description: "Convert PDFs into LLM-readable Markdown with MinerU."
+  default_prompt: "Use $mineru-pdf-to-md to convert this PDF into LLM-readable Markdown."

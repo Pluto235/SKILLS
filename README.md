@@ -1,43 +1,32 @@
-# SKILLS — Claude Code + Codex 配置同步仓库
+# SKILLS — Codex App 配置仓库
 
-私人配置仓库。用于同步 Claude Code 与 Codex 的个人 skills、插件清单和安全偏好模板。目标是在新机器上把这个仓库交给对应 agent 后，一键还原常用工作环境。
+这是 Pluto235 的 Codex App 配置快照，用于在不同机器之间恢复个人 skills、安全设置和用户选择的插件。
 
-## 目录
+仓库以当前 Codex App 为唯一目标，不再维护 Claude Code 配置或 Claude 插件兼容层。
+
+## 保存的内容
 
 | 路径 | 作用 |
 |---|---|
-| `install-all.sh` | 同时安装 Claude Code 与 Codex 的托管配置 |
-| `sync-all.sh` | 从当前机器安全采集 Claude Code + Codex 配置并展示 diff |
-| `install.sh` | 兼容旧入口，转发到 `install-all.sh` |
-| `claude/` | Claude Code 专属 skills、插件 manifest、settings 模板、安装/同步脚本 |
-| `codex/` | Codex 专属 skills、`.agents/skills`、Codex 配置模板、安装/同步脚本 |
-| `shared/skills/` | 可复制到 Codex 的通用 skills |
-| `scripts/` | 安全模板生成与 Codex TOML 合并辅助脚本 |
+| `codex/skills/` | `~/.agents/skills` 的规范化快照 |
+| `codex/config.template.toml` | 脱敏后的可移植 Codex 设置 |
+| `codex/manifest.json` | skill 清单、已启用插件和需要恢复的用户插件 |
+| `codex/install.sh` | 在新机器恢复配置 |
+| `codex/sync.sh` | 从当前机器刷新安全快照 |
+| `sync-all.sh` | 同步、密钥扫描并显示差异 |
+| `install-all.sh` | 一键恢复入口 |
 
-## 新机器一键还原
-
-给 Claude Code 或 Codex 的指令：
-
-```text
-把 git@github.com:Pluto235/SKILLS.git 克隆到 ~/Documents/SKILLS，然后执行 bash ~/Documents/SKILLS/install-all.sh 还原我的 Claude Code 和 Codex 配置。
-```
-
-手动执行：
+## 新机器恢复
 
 ```bash
 git clone git@github.com:Pluto235/SKILLS.git ~/Documents/SKILLS
+bash ~/Documents/SKILLS/install-all.sh --dry-run
 bash ~/Documents/SKILLS/install-all.sh
 ```
 
-先看将会改什么：
+恢复完成后重启 Codex。需要 OAuth 的插件（例如 GitHub）仍需使用目标账号完成授权；认证信息不会进入 Git 仓库。
 
-```bash
-bash ~/Documents/SKILLS/install-all.sh --dry-run
-```
-
-安装后重启 Claude Code 和 Codex，让新 skills/plugins 被加载。
-
-## 同步当前机器到仓库
+## 从当前机器同步
 
 ```bash
 cd ~/Documents/SKILLS
@@ -46,46 +35,24 @@ bash sync-all.sh
 git diff --stat
 git diff
 git add -A
-git commit -m "sync agent config from $(hostname) on $(date -u +%Y-%m-%d)"
+git commit -m "sync Codex App config from $(hostname) on $(date -u +%Y-%m-%d)"
 git push
 ```
 
-`sync-all.sh` 会刷新：
+## 设计原则
 
-- Claude Code skills、marketplaces、enabled plugins、脱敏 settings 模板。
-- Codex user skills、`~/.agents/skills`、安全 Codex config 模板。
-- 明显 secret 模式检查；发现疑似 token 会失败退出。
-
-## 边界
-
-Claude-only：
-
-- `claude/manifest.json`
-- `claude/settings.template.json`
-- `claude/statusline-command.sh`
-- Claude marketplace/plugin 安装逻辑
-
-Codex-only：
-
-- `codex/skills/`
-- `codex/agents-skills/`
-- `codex/pua-skills/`
-- `codex/config.template.toml`
-
-Shared：
-
-- `shared/skills/devlog`
-- `shared/skills/grill-me`
-- `shared/skills/guizang-ppt-skill`
+- 用户 skill 统一保存在 `~/.agents/skills`，避免与旧 `~/.codex/skills` 产生同名冲突。
+- 系统自带 skill、运行时、插件缓存和应用内部文件不复制。
+- OpenAI bundled/primary-runtime/default 插件由 Codex 自己恢复。
+- `manifest.json` 只把用户主动安装、可跨机器恢复的远程插件列入 `plugins.restore`。
+- 本机路径、项目 trust、历史记录和认证凭据不会同步。
 
 ## 绝不入库
 
-- `~/.claude/settings.json` 里的 `env`
-- `ANTHROPIC_AUTH_TOKEN`
-- `GITHUB_PERSONAL_ACCESS_TOKEN`
 - `~/.codex/auth.json`
-- `~/.codex/models_cache.json`
+- API key、OAuth token、GitHub PAT
 - sessions、archived sessions、history、cache、telemetry、shell snapshots
-- 项目级 trust/history/cache 状态
+- Codex App 内置 runtime 和 marketplace 缓存
+- 项目级 trust/history 状态
 
-仓库即使保持私有，也按“可能泄露”标准处理密钥。
+即使仓库保持私有，也按“可能公开”标准处理敏感信息。

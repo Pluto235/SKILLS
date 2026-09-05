@@ -8,9 +8,7 @@
 
 ## Swiss locked mode(必须先读)
 
-本主题的 golden source 是:
-
-`/Users/guohao/Documents/op7418的仓库/项目/Thin-Harness-Fat-Skills/ppt/index.html`
+本主题的 golden source 是仓库内的 `assets/template-swiss.html`(由作者本机的原始参考 PPT 派生;原始文件不随仓库分发,`swiss-layout-lock.md` 登记的 S01-S22 即其版式快照)。
 
 生成正文页时不要把 Swiss 当成“自由组合的风格包”。默认只能使用 `references/swiss-layout-lock.md` 登记的 `S01-S22`。每个 slide 都必须在 `<section>` 上写 `data-layout="Sxx"`。
 
@@ -52,6 +50,32 @@
 | 3 行或更长标题 | 改写标题;实在不能改时用 `min(4.6vw,8.2vh)` |
 
 规则:中文标题优先改短,其次降字号;不要让标题挤占下方图文区域。英文、数字型 hero 可以更大,中文方法论页必须更克制。
+
+**演示最小字号与字重阶梯**
+瑞士风不是网页说明页,投屏时不能出现 10-12px 的注释字。默认下限:
+
+| 文本类型 | 最小字号 |
+|---|---|
+| 正文段落 / 主要说明 | `18px` |
+| 卡片描述 / 列表 / 时间线说明 / caption / 图注 | `16px` |
+| meta / kicker / mono label / 图表标签 | `14px` |
+
+内容过多时,先压缩文案、拆页或更换 Sxx 版式;禁止靠降低小字字号解决拥挤。图注、时间线说明、KPI 注释、底部 note 尤其要守住这个下限。
+
+**字号与字重阶梯(瑞士风核心)** — "越大越细,越小越粗"不是感性描述:
+
+| 字号区间 | 推荐字重 | 典型场景 |
+|---|---|---|
+| ≥ 8vw | 200 (ExtraLight) | 封面大字、巨号 KPI、h-statement |
+| 4-7.9vw | 200-300 | 章节标题(h-xl/h-xl-zh)、大编号 |
+| 1.8-3.9vw | 300-400 | 中型标题、takeaway 标题(≈1.8vw)、中号数字 |
+| 1-1.7vw / 16-20px | 400-500 | 正文段落、卡片描述、说明文字 |
+| 13-15px(小字) | 500-600 | meta、kicker、角标、图表标签、caption 强调 |
+
+**硬规则:**
+- 同一页内,字号越小的元素字重必须 ≥ 字号越大的元素(不允许 16px 正文用 300 而 1.8vw 标题用 500)
+- 16px 左右的小字拒绝使用 weight 300(太细不可读),最低 400,推荐 500
+- 封面/IKB 反白大标题内强调字用 `italic + weight 300`,不要用 accent 色(蓝压蓝看不见)
 
 **网格**(IBM Carbon 2x Grid 改造)
 - 16 列 grid:`grid-template-columns:repeat(16,1fr)` + `gap:16px`
@@ -177,7 +201,7 @@ Swiss 主题有 22 个登记版式,生成时要主动展示版式系统,不要�
 
 不要只看 HTML/CSS。Swiss 模板的还原度要同时从**浏览器视觉**和**代码结构**判断:
 
-1. 同时打开三份页面:原始参考 PPT、当前 `template-swiss.html` 或生成页、正在修改的测试 PPT。原始参考路径是 `/Users/guohao/Documents/op7418的仓库/项目/Thin-Harness-Fat-Skills/ppt/index.html`。
+1. 同时打开两份页面:当前 `template-swiss.html`(golden source 快照)和正在修改的测试 PPT;有条件时再加一份此前验收过的成品 deck 作对照。
 2. 截图前先等入场动效稳定(约 1-2 秒)。不要把动画中间态误判成"内容缺失"或"版式空白"。
 3. 先看视觉:标题重量、头部距离、图片落位、底部安全区、caption 是否被 nav 挡住。
 4. 对照原始参考 PPT 的同类版式,不要只对照 CSS helper;以实际页面结构和视觉结果为准。

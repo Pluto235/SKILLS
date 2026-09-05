@@ -1,0 +1,4 @@
+interface:
+  display_name: "Preview"
+  short_description: "只读理解任务、识别歧义并给出执行计划"
+  default_prompt: "请用 preview 先检查任务理解，不要修改代码。"
