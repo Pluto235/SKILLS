@@ -10,7 +10,7 @@
 |---|---|
 | `codex/skills/` | `~/.agents/skills` 的规范化快照 |
 | `codex/config.template.toml` | 脱敏后的可移植 Codex 设置 |
-| `codex/manifest.json` | skill 清单、已启用插件和需要恢复的用户插件 |
+| `codex/manifest.json` | skill 清单、已启用插件、可移植 Git marketplace 和需要恢复的用户插件 |
 | `codex/install.sh` | 在新机器恢复配置 |
 | `codex/sync.sh` | 从当前机器刷新安全快照 |
 | `sync-all.sh` | 同步、密钥扫描并显示差异 |
@@ -45,6 +45,7 @@ git push
 - 系统自带 skill、运行时、插件缓存和应用内部文件不复制。
 - OpenAI bundled/primary-runtime/default 插件由 Codex 自己恢复。
 - `manifest.json` 只把用户主动安装、可跨机器恢复的远程插件列入 `plugins.restore`。
+- 自定义 marketplace 仅保存可移植的 Git URL，不保存本地 marketplace 路径或任何认证信息；恢复时先添加 marketplace，再安装插件。
 - 本机路径、项目 trust、历史记录和认证凭据不会同步。
 
 ## 绝不入库

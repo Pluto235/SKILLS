@@ -35,6 +35,9 @@ enabled = true
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
 
+[plugins."ponytail@ponytail"]
+enabled = true
+
 [desktop]
 conversationDetailMode = "STEPS_COMMANDS"
 followUpQueueMode = "queue"

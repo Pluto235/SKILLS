@@ -55,8 +55,28 @@ else
   python3 "$REPO_DIR/scripts/merge_codex_config.py" "$CODEX_DIR/config.toml" "$CODEX_SRC/config.template.toml"
 fi
 
-log "restoring user-selected Codex plugins"
+log "restoring portable Git marketplaces"
 manifest="$CODEX_SRC/manifest.json"
+if [ -f "$manifest" ]; then
+  while IFS=$'\t' read -r marketplace_name marketplace_source; do
+    [ -n "$marketplace_name" ] || continue
+    [ -n "$marketplace_source" ] || continue
+    if [ "$DRY_RUN" = 1 ]; then
+      echo "[dry-run] codex plugin marketplace add $marketplace_source  # $marketplace_name"
+    elif codex plugin marketplace list --json \
+      | jq -e --arg name "$marketplace_name" --arg source "$marketplace_source" \
+        '.marketplaces[]? | select(.name == $name and .marketplaceSource.source == $source)' \
+        >/dev/null; then
+      log "marketplace $marketplace_name already configured"
+    else
+      codex plugin marketplace add --json "$marketplace_source" >/dev/null || {
+        echo "warning: could not add marketplace $marketplace_name from $marketplace_source" >&2
+      }
+    fi
+  done < <(jq -r '.marketplaces[]? | select(.source_type == "git") | [.name, .source] | @tsv' "$manifest")
+fi
+
+log "restoring user-selected Codex plugins"
 if [ -f "$manifest" ]; then
   while IFS= read -r plugin_id; do
     [ -n "$plugin_id" ] || continue

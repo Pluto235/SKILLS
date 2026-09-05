@@ -14,7 +14,38 @@ def dirs(path: Path) -> list[str]:
     return sorted(p.name for p in path.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
 
 
-def plugin_snapshot() -> tuple[list[dict[str, object]], list[str]]:
+def marketplace_snapshot() -> list[dict[str, str]]:
+    try:
+        proc = subprocess.run(
+            ["codex", "plugin", "marketplace", "list", "--json"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        marketplaces = json.loads(proc.stdout).get("marketplaces", [])
+    except (OSError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+        print(f"warning: could not read Codex marketplaces: {exc}", file=sys.stderr)
+        return []
+
+    # Git URLs are portable metadata. Local marketplace paths are machine-specific
+    # and may expose usernames or private filesystem layout, so never snapshot them.
+    return sorted(
+        (
+            {
+                "name": item["name"],
+                "source_type": source["sourceType"],
+                "source": source["source"],
+            }
+            for item in marketplaces
+            if item.get("name")
+            and (source := item.get("marketplaceSource", {})).get("sourceType") == "git"
+            and source.get("source")
+        ),
+        key=lambda item: item["name"],
+    )
+
+
+def plugin_snapshot(custom_marketplaces: set[str]) -> tuple[list[dict[str, object]], list[str]]:
     try:
         proc = subprocess.run(
             ["codex", "plugin", "list", "--json"],
@@ -41,7 +72,10 @@ def plugin_snapshot() -> tuple[list[dict[str, object]], list[str]]:
     restore = sorted(
         item["id"]
         for item in enabled
-        if item.get("marketplace") == "openai-curated-remote"
+        if (
+            item.get("marketplace") == "openai-curated-remote"
+            or item.get("marketplace") in custom_marketplaces
+        )
         and item.get("install_policy") == "AVAILABLE"
     )
     return enabled, restore
@@ -52,7 +86,10 @@ def main() -> int:
         print("usage: write_codex_manifest.py SNAPSHOT_DIR", file=sys.stderr)
         return 2
     root = Path(sys.argv[1])
-    enabled_plugins, restore_plugins = plugin_snapshot()
+    marketplaces = marketplace_snapshot()
+    enabled_plugins, restore_plugins = plugin_snapshot(
+        {item["name"] for item in marketplaces}
+    )
     manifest = {
         "skills": {
             "root": "~/.agents/skills",
@@ -66,6 +103,7 @@ def main() -> int:
                 "bundled_and_default_plugins_are_restored_by_codex": True,
             },
         },
+        "marketplaces": marketplaces,
     }
     (root / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
     return 0
