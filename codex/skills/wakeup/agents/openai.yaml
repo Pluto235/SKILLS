@@ -1,0 +1,3 @@
+interface:
+  display_name: "Wakeup"
+  short_description: "Summarize recent work across Codex projects"
