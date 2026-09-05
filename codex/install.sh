@@ -27,7 +27,6 @@ run() {
 }
 
 command -v python3 >/dev/null || { echo "python3 not found in PATH" >&2; exit 1; }
-command -v jq >/dev/null || { echo "jq not found in PATH" >&2; exit 1; }
 command -v codex >/dev/null || { echo "codex not found in PATH" >&2; exit 1; }
 
 run mkdir -p "$AGENTS_DIR/skills"
@@ -64,16 +63,31 @@ if [ -f "$manifest" ]; then
     if [ "$DRY_RUN" = 1 ]; then
       echo "[dry-run] codex plugin marketplace add $marketplace_source  # $marketplace_name"
     elif codex plugin marketplace list --json \
-      | jq -e --arg name "$marketplace_name" --arg source "$marketplace_source" \
-        '.marketplaces[]? | select(.name == $name and .marketplaceSource.source == $source)' \
-        >/dev/null; then
+      | python3 -c 'import json, sys
+name, source = sys.argv[1:3]
+items = json.load(sys.stdin).get("marketplaces", [])
+raise SystemExit(0 if any(
+    item.get("name") == name
+    and item.get("marketplaceSource", {}).get("source") == source
+    for item in items
+) else 1)' "$marketplace_name" "$marketplace_source"; then
       log "marketplace $marketplace_name already configured"
     else
       codex plugin marketplace add --json "$marketplace_source" >/dev/null || {
         echo "warning: could not add marketplace $marketplace_name from $marketplace_source" >&2
       }
     fi
-  done < <(jq -r '.marketplaces[]? | select(.source_type == "git") | [.name, .source] | @tsv' "$manifest")
+  done < <(python3 - "$manifest" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as handle:
+    manifest = json.load(handle)
+for item in manifest.get("marketplaces", []):
+    if item.get("source_type") == "git" and item.get("name") and item.get("source"):
+        print(f'{item["name"]}\t{item["source"]}')
+PY
+  )
 fi
 
 log "restoring user-selected Codex plugins"
@@ -87,7 +101,17 @@ if [ -f "$manifest" ]; then
         echo "warning: could not install $plugin_id; finish setup in Codex Plugins" >&2
       }
     fi
-  done < <(jq -r '.plugins.restore[]? // empty' "$manifest")
+  done < <(python3 - "$manifest" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as handle:
+    manifest = json.load(handle)
+for plugin_id in manifest.get("plugins", {}).get("restore", []):
+    if plugin_id:
+        print(plugin_id)
+PY
+  )
 fi
 
 log "done"

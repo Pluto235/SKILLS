@@ -25,6 +25,7 @@ bash ~/Documents/SKILLS/install-all.sh
 ```
 
 恢复完成后重启 Codex。需要 OAuth 的插件（例如 GitHub）仍需使用目标账号完成授权；认证信息不会进入 Git 仓库。
+恢复脚本只依赖 `python3` 和 `codex`，适用于没有预装 `jq` 的 Linux SSH 主机。
 
 ## 从当前机器同步
 

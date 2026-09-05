@@ -16,7 +16,6 @@ for arg in "$@"; do
   esac
 done
 
-command -v jq >/dev/null || { echo "jq not found in PATH" >&2; exit 1; }
 command -v python3 >/dev/null || { echo "python3 not found in PATH" >&2; exit 1; }
 
 args=()
